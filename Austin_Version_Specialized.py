@@ -86,7 +86,7 @@ def mutate_offspring(mutagenic_temperature, child):
             child[i] += random.uniform(-0.1,0.1)
             if child[i] < -1:
                 child[i] = -1
-            if child[1] > 1:
+            if child[i] > 1:
                 child[i] = 1
     return child
 
