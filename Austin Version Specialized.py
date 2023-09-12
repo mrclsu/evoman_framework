@@ -44,10 +44,7 @@ def initialize_population(pop_size, d_hi, d_lo, num_vars):
     for i in range(pop_size):
         member = np.zeros(num_vars)
         for j in range(num_vars):
-            if random.randint(0,1) > 0.5:
-               member[j] = random.random()
-            else:
-                member[j] = random.random()*-1
+            member[j] = random.uniform(-1,1)
         pop.append(member)
     return pop
     
