@@ -36,7 +36,7 @@ d_lo = -1
 mutagenic_temperature = 0.3
 threshold = 0.2
 replacement = 0.5
-pop_size = 500
+pop_size = 10
 generations = 200
 
 def initialize_population(pop_size, d_hi, d_lo, num_vars):
@@ -109,7 +109,7 @@ def reproduce(pop, fit_scores):
 
 
 performance = []  
-pop = initialize_population(10, d_hi, d_lo, num_vars)
+pop = initialize_population(pop_size, d_hi, d_lo, num_vars)
 for i in range(generations):
     fit_scores, maxi = test_population(pop)
     performance.append(maxi)
