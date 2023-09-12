@@ -31,15 +31,13 @@ env = Environment(experiment_name=experiment_name,
 				  visuals=False)
 print(env.get_num_sensors())
 num_vars = n_hidden_neurons*(env.get_num_sensors()+1) + (n_hidden_neurons+1)*5
-d_hi = 1
-d_lo = -1
 mutagenic_temperature = 0.3
 threshold = 0.2
 replacement = 0.5
 pop_size = 10
 generations = 200
 
-def initialize_population(pop_size, d_hi, d_lo, num_vars):
+def initialize_population(pop_size, num_vars):
     pop = []
     for i in range(pop_size):
         member = np.zeros(num_vars)
