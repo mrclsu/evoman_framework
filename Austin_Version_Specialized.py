@@ -83,7 +83,7 @@ def select_parents(pop, low, high):
 def mutate_offspring(mutagenic_temperature, child):
     for i in range(len(child)):
         if random.random() < mutagenic_temperature:
-            child[i] += random.uniform(-0.1,0.1)
+            child[i] += random.uniform(-0.5,0.5)
             if child[i] < -1:
                 child[i] = -1
             if child[i] > 1:
