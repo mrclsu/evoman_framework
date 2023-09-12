@@ -34,8 +34,8 @@ num_vars = n_hidden_neurons*(env.get_num_sensors()+1) + (n_hidden_neurons+1)*5
 mutagenic_temperature = 0.3
 threshold = 0.2
 replacement = 0.5
-pop_size = 10
-generations = 200
+pop_size = 100
+generations = 30
 
 def initialize_population(pop_size, num_vars):
     pop = []
@@ -104,7 +104,7 @@ def reproduce(pop, fit_scores):
 
 
 performance = []  
-pop = initialize_population(pop_size, d_hi, d_lo, num_vars)
+pop = initialize_population(pop_size, num_vars)
 for i in range(generations):
     fit_scores, maxi = test_population(pop)
     performance.append(maxi)
