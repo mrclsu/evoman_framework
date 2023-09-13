@@ -1,8 +1,8 @@
 #######################################################################################
-# EvoMan EA			                              		                        	  #
-# DEMO : perceptron neural network controller evolved by Genetic Algorithm        	  #
+# EvoMan EA			                              		              #
+# DEMO : perceptron neural network controller evolved by Genetic Algorithm            #
 #                                                                                     #
-# Author: Austin Dickerson       			                                  		  #
+# Author: Austin Dickerson       			                              #
 #######################################################################################
 #%%
 # imports framework
