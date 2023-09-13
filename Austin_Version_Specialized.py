@@ -4,8 +4,7 @@
 #                                                                                     #
 # Author: Austin Dickerson       			                                  		  #
 #######################################################################################
-#%%
-# imports framework
+
 import sys, os
 from evoman.environment import Environment
 from demo_controller import player_controller
