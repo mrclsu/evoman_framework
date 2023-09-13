@@ -4,8 +4,7 @@
 #                                                                                     #
 # Author: Austin Dickerson       			                                  		  #
 #######################################################################################
-#%%
-# imports framework
+
 import sys, os
 from evoman.environment import Environment
 from demo_controller import player_controller
@@ -17,10 +16,8 @@ experiment_name = 'controller_specialist_demo'
 if not os.path.exists(experiment_name):
     os.makedirs(experiment_name)
 
-env = Environment()
-
 n_hidden_neurons = 10
-num_vars = n_hidden_neurons*(env.get_num_sensors()+1) + (n_hidden_neurons+1)*5
+num_vars = n_hidden_neurons*(21) + (n_hidden_neurons+1)*5
 replacement = 0.5
 pop_size = 200
 generations = 30
@@ -136,7 +133,7 @@ bests = []
 for i in range(1,6):
     env = Environment(experiment_name=experiment_name,
 				  playermode="ai",
-                  enemies=[1],
+                  		  enemies=[1],
 				  player_controller=player_controller(n_hidden_neurons),
 			  	  speed="fastest",
 				  enemymode="static",
@@ -145,51 +142,3 @@ for i in range(1,6):
     best = test_mutation(0.5, 0.1*i)
     bests.append(best)
 np.savetxt("Reseed_Boss_1.csv", bests, delimiter=",")
-
-#%%
-import sys, os
-import numpy as np
-import pandas as pd
-from evoman.environment import Environment
-from demo_controller import player_controller
-
-def simulate(env,unit):
-    fit, _, _, _ = env.play(pcont=unit)
-    return fit
-
-experiment_name = 'controller_specialist_demo'
-
-if not os.path.exists(experiment_name):
-    os.makedirs(experiment_name)
-
-n_hidden_neurons = 10
-
-bests2 = pd.read_csv("Reseed_Boss_1.csv", delimiter=",")
-performance = []
-
-for j in range(4):
-
-    scores = []
-
-    env = Environment(experiment_name=experiment_name,
-				  playermode="ai",
-                  enemies=[1],
-				  player_controller=player_controller(n_hidden_neurons),
-			  	  speed="normal",
-				  enemymode="static",
-				  level=2,
-				  visuals=True)
-    
-    for i in range(5):    
-
-        score = simulate(env,np.array(bests2.iloc[j]))
-        scores.append(score)
-    performance.append(np.mean(np.array(scores)))
-
-for i in range(len(performance)):
-
-    print(f"Mutation_Degree {(i+1)*0.1} average score {performance[i]}")
-
-
-
-# %%
