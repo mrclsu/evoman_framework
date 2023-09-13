@@ -212,18 +212,17 @@ for j in range(1,9):
 
     env = Environment(experiment_name=experiment_name,
 				  playermode="ai",
-                  enemies=[j],
+                  		  enemies=[j],
 				  player_controller=player_controller(n_hidden_neurons),
 			  	  speed="normal",
 				  enemymode="static",
 				  level=2,
 				  visuals=True)
-    
-    #for i in range(5):    
 
-    score = simulate(env,np.array(bests2.iloc[j-1]))
-    scores.append(score)
-    performance.append(np.mean(np.array(scores)))
+    for i in range(5):
+    	score = simulate(env,np.array(bests2.iloc[j-1]))
+    	scores.append(score)
+    	performance.append(np.mean(np.array(scores)))
 
 for i in range(len(performance)):
 
