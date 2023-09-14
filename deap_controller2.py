@@ -69,7 +69,7 @@ toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 toolbox.register("mate", tools.cxESBlend, alpha=0.1)
 toolbox.register("mutate", tools.mutESLogNormal, c=1.0, indpb=0.03)
 toolbox.register("select", tools.selTournament, tournsize=3)
-toolbox.register("evaluate", benchmarks.sphere)
+toolbox.register("evaluate", evaluate)
 
 toolbox.decorate("mate", checkStrategy(MIN_STRATEGY))
 toolbox.decorate("mutate", checkStrategy(MIN_STRATEGY))
