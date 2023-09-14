@@ -1,76 +1,93 @@
-import sys, os
+import os, random, array
 from deap import base, creator, tools, algorithms
 from evoman.environment import Environment
 from evoman.controller import Controller
 import numpy as np
 
-# Define DEAP fitness and individual classes
-creator.create("FitnessMax", base.Fitness, weights=(1.0,))
-creator.create("Individual", np.ndarray, fitness=creator.FitnessMax)
+IND_SIZE = 10
+MIN_VALUE = 10
+MAX_VALUE = 10
+MIN_STRATEGY = 0.2
+MAX_STRATEGY = 0.7
 
 class player_controller(Controller):
   def __init__(self, n_hidden):
     self.n_hidden = n_hidden
-  
-# Define evaluation function
-def evaluate_individual(individual):
-  player = player_controller(n_hidden=n_hidden_neurons)
-  player.set(individual, n_inputs=10)
-  
-  total_fitness = 0
-  
-  for en in range(1, 9):
-      env.update_parameter('enemies', [en])
-      fitness, *_ = env.play(player.control)
-      total_fitness += fitness
-  
-  return (total_fitness,)
-
-# Define DEAP Toolbox
-toolbox = base.Toolbox()
-toolbox.register("attr_float", np.random.uniform, -1, 1)  # Assuming controller weights are in range [-1, 1]
-toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.attr_float, n=16)
-toolbox.register("population", tools.initRepeat, list, toolbox.individual)
-toolbox.register("evaluate", evaluate_individual)
-toolbox.register("mate", tools.cxBlend, alpha=0.5)  # Assuming want to use blend crossover
-toolbox.register("mutate", tools.mutGaussian, mu=0, sigma=0.2, indpb=0.2)
-toolbox.register("select", tools.selBest)
 
 experiment_name = 'deap_specialist_demo'
 if not os.path.exists(experiment_name):
-    os.makedirs(experiment_name)
+  os.makedirs(experiment_name)
 
-n_hidden_neurons = 0
+n_hidden_neurons = 10
 
 env = Environment(experiment_name=experiment_name,
+                  enemies=[1],
                   playermode="ai",
-                  player_controller=player_controller(n_hidden_neurons),
+                  player_controller=player_controller(n_hidden=n_hidden_neurons),
                   speed="fastest",
                   enemymode="static",
                   level=2,
                   visuals=True)
 
-# tests saved demo solutions for each enemy
-for en in range(1, 9):
-    env.update_parameter('enemies',[en])
-    sol = np.loadtxt('solutions_demo/demo_'+str(en)+'.txt')
-    print('\n LOADING SAVED SPECIALIST SOLUTION FOR ENEMY '+str(en)+' \n')
-    env.play(sol)
+# number of weights for multilayer with 10 hidden neurons
+n_vars = (env.get_num_sensors()+1)*n_hidden_neurons + (n_hidden_neurons+1)*5
 
-# Create and evolve the population
-population = toolbox.population(n=50)
-generations = 10
+def simulation(env,x):
+  fit, _, _, _ = env.play(pcont=x)
+  return fit
 
-for gen in range(generations):
-    offspring = algorithms.varAnd(population, toolbox, cxpb=0.7, mutpb=0.2)  # Adjust crossover and mutation probabilities
-    fits = toolbox.map(toolbox.evaluate, offspring)
-    for fit, ind in zip(fits, offspring):
-        ind.fitness.values = fit
-    population = toolbox.select(offspring, k=len(population))
+def evaluate(individual):
+  return simulation(env, individual),
 
-# Retrieve best individual and its performance
-best_individual = tools.selBest(population, k=1)[0]
-best_fitness = best_individual.fitness.values[0]
+# Define DEAP fitness and individual classes
+creator.create("FitnessMax", base.Fitness, weights=(1.0,))
+creator.create("Individual", array.array, typecode="d", fitness=creator.FitnessMax, strategy=None)
+creator.create("Strategy", array.array, typecode="d")
 
+def generateES(icls, scls, size, imin, imax, smin, smax):
+  ind = icls(random.uniform(imin, imax) for _ in range(size))
+  ind.strategy = scls(random.uniform(smin, smax) for _ in range(size))
+  return ind
 
+def checkStrategy(minstrategy):
+  def decorator(func):
+      def wrappper(*args, **kargs):
+          children = func(*args, **kargs)
+          for child in children:
+              for i, s in enumerate(child.strategy):
+                  if s < minstrategy:
+                      child.strategy[i] = minstrategy
+          return children
+      return wrappper
+  return decorator
 
+# Define DEAP Toolbox
+toolbox = base.Toolbox()
+toolbox.register("individual", generateES, creator.Individual, creator.Strategy,
+  IND_SIZE, MIN_VALUE, MAX_VALUE, MIN_STRATEGY, MAX_STRATEGY)
+toolbox.register("population", tools.initRepeat, list, toolbox.individual)
+toolbox.register("mate", tools.cxESBlend, alpha=0.1)
+toolbox.register("mutate", tools.mutESLogNormal, c=1.0, indpb=0.03)
+toolbox.register("select", tools.selTournament, tournsize=3)
+toolbox.register("evaluate", evaluate)
+
+toolbox.decorate("mate", checkStrategy(MIN_STRATEGY))
+toolbox.decorate("mutate", checkStrategy(MIN_STRATEGY))
+
+def main():
+  MU, LAMBDA = 100, 100
+  pop = toolbox.population(n=MU)
+  hof = tools.HallOfFame(1)
+  stats = tools.Statistics(lambda ind: ind.fitness.values)
+  stats.register("avg", np.mean)
+  stats.register("std", np.std)
+  stats.register("min", np.min)
+  stats.register("max", np.max)
+
+  pop, logbook = algorithms.eaMuCommaLambda(pop, toolbox, mu=MU, lambda_=LAMBDA, 
+      cxpb=0.6, mutpb=0.3, ngen=500, stats=stats, halloffame=hof, verbose=True)
+
+  return pop, logbook, hof
+
+if __name__ == "__main__":
+  main()
