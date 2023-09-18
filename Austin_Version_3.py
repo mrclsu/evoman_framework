@@ -248,7 +248,7 @@ def test_params(string):
 
         env = Environment(experiment_name=experiment_name,
 				  playermode="ai",
-                  enemies=[j],
+                  		  enemies=[j],
 				  player_controller=player_controller(n_hidden_neurons),
 			  	  speed="normal",
 				  enemymode="static",
