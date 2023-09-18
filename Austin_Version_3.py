@@ -266,5 +266,6 @@ def test_params(string):
 
     return performance
 
-train_all_8("V18")
-test_params("V18")
+filename = "Test_1"
+train_all_8(filename)
+test_params(filename)
