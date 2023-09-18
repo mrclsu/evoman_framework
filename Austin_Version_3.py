@@ -268,4 +268,4 @@ def test_params(string):
 
 filename = "Test_1"
 train_all_8(filename)
-test_params(filename)
+performance = test_params(filename)
