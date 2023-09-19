@@ -93,11 +93,11 @@ stats.register("std", np.std)
     
 if __name__ == "__main__":
     # Parameters
-    MU = 50  # Number of initial individuals
-    LAMBDA = 50  # Number of children to produce at each generation
+    MU = 100  # Number of initial individuals
+    LAMBDA = 100  # Number of children to produce at each generation
     CXPB = 0.7
     MUTPB = 0.2
-    NGEN = 50
+    NGEN = 100
     
     # Initialize population
     pop = toolbox.population(n=MU)
