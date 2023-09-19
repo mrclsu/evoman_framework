@@ -4,12 +4,6 @@ from evoman.environment import Environment
 from evoman.controller import Controller
 import numpy as np
 
-IND_SIZE = 10
-MIN_VALUE = 10
-MAX_VALUE = 10
-MIN_STRATEGY = 0.2
-MAX_STRATEGY = 0.7
-
 class player_controller(Controller):
   def __init__(self, n_hidden):
     self.n_hidden = n_hidden
@@ -26,7 +20,7 @@ env = Environment(experiment_name=experiment_name,
                   player_controller=player_controller(n_hidden=n_hidden_neurons),
                   speed="fastest",
                   enemymode="static",
-                  level=2,
+                  level=1,
                   visuals=True)
 
 # number of weights for multilayer with 10 hidden neurons
@@ -38,6 +32,12 @@ def simulation(env,x):
 
 def evaluate(individual):
   return simulation(env, individual),
+
+IND_SIZE = n_vars
+MIN_VALUE = -1
+MAX_VALUE = 1
+MIN_STRATEGY = 0.1
+MAX_STRATEGY = 0.3
 
 # Define DEAP fitness and individual classes
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
@@ -85,7 +85,7 @@ def main():
   stats.register("max", np.max)
 
   pop, logbook = algorithms.eaMuCommaLambda(pop, toolbox, mu=MU, lambda_=LAMBDA, 
-      cxpb=0.6, mutpb=0.3, ngen=500, stats=stats, halloffame=hof, verbose=True)
+      cxpb=0.6, mutpb=0.3, ngen=50, stats=stats, halloffame=hof, verbose=True)
 
   return pop, logbook, hof
 
