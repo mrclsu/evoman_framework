@@ -15,16 +15,13 @@ if not os.path.exists(experiment_name):
 n_hidden_neurons = 10
 
 env = Environment(experiment_name=experiment_name,
-                  enemies=[1],
+                  enemies=[5],
                   playermode="ai",
                   player_controller=player_controller(n_hidden=n_hidden_neurons),
                   speed="fastest",
                   enemymode="static",
-                  level=1,
+                  level=2,
                   visuals=True)
-
-# number of weights for multilayer with 10 hidden neurons
-n_vars = (env.get_num_sensors()+1)*n_hidden_neurons + (n_hidden_neurons+1)*5
 
 def simulation(env,x):
   fit, _, _, _ = env.play(pcont=x)
@@ -33,11 +30,11 @@ def simulation(env,x):
 def evaluate(individual):
   return simulation(env, individual),
 
-IND_SIZE = n_vars
-MIN_VALUE = -1
-MAX_VALUE = 1
-MIN_STRATEGY = 0.1
-MAX_STRATEGY = 0.3
+IND_SIZE = 30
+MIN_VALUE = 4
+MAX_VALUE = 5
+MIN_STRATEGY = 0.5
+MAX_STRATEGY = 3
 
 # Define DEAP fitness and individual classes
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
