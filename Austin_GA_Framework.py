@@ -25,7 +25,6 @@ generations = 100
 early_stop = False
 discrete = False
 elitism = False
-midpoint = False
 half = False
 mutation_intensity = 1
 mutagenic_temperature = 0.2
