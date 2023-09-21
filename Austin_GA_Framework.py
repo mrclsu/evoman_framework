@@ -26,6 +26,7 @@ early_stop = False
 discrete = False
 elitism = False
 half = False
+midpoint= False
 mutation_intensity = 1
 mutagenic_temperature = 0.2
 curve_parents = False
