@@ -4,19 +4,11 @@ from evoman.environment import Environment
 import numpy as np
 import os
 import csv
+import pickle
 
 experiment_name = 'neat-controller'
 visuals = False
-env = Environment(
-            experiment_name=experiment_name,
-            enemies=[4],
-            playermode="ai",
-            enemymode="static",
-            level=2,
-            speed="fastest",
-            visuals=visuals,
-            sound='off',
-)
+env = None
 
 def sigmoid_activation(x):
     return 1./(1.+np.exp(-x))
@@ -46,7 +38,7 @@ def eval_genomes(genomes, config):
         genome.fitness = env.play()[0]
 
 
-def run(config, working_dir, run_num = 0):
+def run(config, working_dir, enemy, run_num = 0):
         # Create the population, which is the top-level object for a NEAT run.
     p = neat.Population(config)
 
@@ -61,10 +53,10 @@ def run(config, working_dir, run_num = 0):
     # p.add_reporter(checkpointer)
     
     # todo change back to 100
-    winner = p.run(eval_genomes, 1)
-    stats.save()
+    winner = p.run(eval_genomes, 100)
+    # stats.save()
     # Save stats to a csv with the run number
-    with open(os.path.join(working_dir, f'stats-{run_num}.csv'), 'w') as csvfile:
+    with open(os.path.join(working_dir, f'stats-{enemy}-{run_num}.csv'), 'w') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(['generation', 'max_fitness', 'mean_fitness', 'stdev_fitness'])
 
@@ -74,14 +66,29 @@ def run(config, working_dir, run_num = 0):
 
         for g in zip(range(0, len(max_fitness)), max_fitness, mean_fitness, stdev_fitness):
             writer.writerow([g[0], g[1], g[2], g[3]])
-    # winner.save(f'winner-{run_num}')
+
     print(winner)
+
+    # Save winner to a pickle file
+    with open(os.path.join(working_dir, f'winner-{enemy}-{run_num}.pkl'), 'wb') as output:
+        pickle.dump(winner, output, 1)
 
 
 def main():
     # Create folder for evomen output
     if not os.path.exists(experiment_name):
         os.makedirs(experiment_name)
+
+    global env 
+    env = Environment(
+            experiment_name=experiment_name,
+            playermode="ai",
+            enemymode="static",
+            level=2,
+            speed="fastest",
+            visuals=visuals,
+            sound='off',
+    )
 
     # Load configuration.
     local_dir = os.path.dirname(__file__)
@@ -90,7 +97,38 @@ def main():
                          neat.DefaultSpeciesSet, neat.DefaultStagnation,
                          config_path)
 
-    run(config = config, working_dir = experiment_name, run_num = 0)
+    for enemy in [1, 4, 6]:
+        env.enemies = [enemy]
+        for run in range(0, 1): # todo change back to 10
+            run(config = config, working_dir = experiment_name, enemy = enemy, run_num = 0)
+
+def run_winner():
+    local_dir = os.path.dirname(__file__)
+    config_path = os.path.join(local_dir, 'config-feedforward')
+    config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
+                         neat.DefaultSpeciesSet, neat.DefaultStagnation,
+                         config_path)
+    
+    global env 
+    env = Environment(
+            experiment_name=experiment_name,
+            enemies=[4],
+            playermode="ai",
+            enemymode="static",
+            level=2,
+            speed="normal",
+            visuals=True,
+            sound='off',
+    )
+
+    with open(os.path.join(experiment_name, 'winner-0.pkl'), 'rb') as input_file:
+        genome = pickle.load(input_file)
+        net = neat.nn.FeedForwardNetwork.create(genome, config)
+        player = player_controller(net)
+
+        env.player_controller = player
+        print(env.play()[0])
 
 if __name__ == '__main__':
-    main()
+    # main()
+    run_winner()
