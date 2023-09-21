@@ -16,7 +16,6 @@ env = Environment(
         enemymode="static",
         level=2,
         speed="normal",
-        visuals=True,
         sound='off',
 )
 
@@ -85,7 +84,7 @@ def run_experiment(config, working_dir, enemy, run_num = 0):
 
 def run(config, enemies = [1, 4, 6], runs = 1):
     env.speed = 'fastest'
-    env.visuals = False
+    env.visuals = visuals
 
     for enemy in enemies:
         env.enemies = [enemy]
