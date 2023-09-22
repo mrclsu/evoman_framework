@@ -16,9 +16,18 @@ env = Environment(
         playermode="ai",
         enemymode="static",
         level=2,
-        speed="normal",
         sound='off',
 )
+
+def init_env():
+    global env
+    env = Environment(
+        experiment_name=experiment_name,
+        playermode="ai",
+        enemymode="static",
+        level=2,
+        sound='off',
+    )
 
 def sigmoid_activation(x):
     return 1./(1.+np.exp(-x))
@@ -92,6 +101,7 @@ def run(config, enemies = [1, 4, 6], runs = 1):
     for enemy in enemies:
         env.enemies = [enemy]
         for run in range(0, runs):
+            init_env()
             start_time = time.perf_counter_ns() 
             run_experiment(config = config, working_dir = experiment_name, enemy = enemy, run_num = run)
             run_time = time.perf_counter_ns() - start_time
@@ -111,7 +121,7 @@ def run_winner(config, enemy, run_number):
     env.visuals = True
     env.speed = 'normal'
 
-    with open(os.path.join(experiment_name, f'winner-{enemy}-{run_number}.pkl'), 'rb') as input_file:
+    with open(os.path.join(experiment_name, 'winners', f'winner-{enemy}-{run_number}.pkl'), 'rb') as input_file:
         genome = pickle.load(input_file)
         net = neat.nn.FeedForwardNetwork.create(genome, config)
         player = player_controller(net)
