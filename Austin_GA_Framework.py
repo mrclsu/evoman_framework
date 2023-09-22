@@ -6,7 +6,7 @@
 
 
 # imports evoman framework
-import os, random
+import os, random, time
 from evoman.environment import Environment
 from demo_controller import player_controller
 import numpy as np
@@ -354,6 +354,7 @@ def train_set(string="V0", mutagenic_temperature=0.2, mutation_intensity=1,
     lasts = []
     up_avg = []
     st_devs = []
+    times = [time.time_ns()]
 
     for j in set:
         global env
@@ -372,15 +373,19 @@ def train_set(string="V0", mutagenic_temperature=0.2, mutation_intensity=1,
         lasts.append(last_best)
         up_avg.append(upper_avg_stat)
         st_devs.append(st_dev)
+        times.append(time.time_ns())
 
     np.savetxt(f"{string}_Params.csv", bests, delimiter=",")
     np.savetxt(f"{string}_Last_Params.csv", lasts, delimiter=",")
+    np.savetxt(f"{string}_Timestamps.csv", times, delimiter=",")
 
     if early_stop != True:
         np.savetxt(f"{string}_Means.csv", means, delimiter=",")
         np.savetxt(f"{string}_Peaks.csv", peaks, delimiter=",")
         np.savetxt(f"{string}_Upper_Avg.csv", up_avg, delimiter=",")
         np.savetxt(f"{string}_St_Dev.csv", st_devs, delimiter=",")
+
+    print(f'Timestamps: {times}')
 
 def test_params(string, runs=1, set=[1,2,3,4,5,6,7,8]):
     bests = pd.read_csv(f"{string}_Params.csv", delimiter=",", header=None)
@@ -389,7 +394,6 @@ def test_params(string, runs=1, set=[1,2,3,4,5,6,7,8]):
 
     for count, j in enumerate(set):
         scores = []
-
         env = Environment(experiment_name=experiment_name,
 				  playermode="ai",
                   enemies=[j],
@@ -412,7 +416,7 @@ def test_params(string, runs=1, set=[1,2,3,4,5,6,7,8]):
 
 #Train New GAs
 
-filename = "V1_Test"
+filename = "V22.1_Test"
 train_set(filename, elitism=5, half=False, mutagenic_temperature=0.1, curve_parents=True, 
           discrete=False, reseed_cycle=False, set=[1,4,6])
 
