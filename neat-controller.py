@@ -6,6 +6,7 @@ import os
 import csv
 import pickle
 import argparse
+import time
 
 experiment_name = 'neat-controller'
 visuals = False
@@ -86,10 +87,24 @@ def run(config, enemies = [1, 4, 6], runs = 1):
     env.speed = 'fastest'
     env.visuals = visuals
 
+    run_times = {enemy: [] for enemy in enemies}
+
     for enemy in enemies:
         env.enemies = [enemy]
         for run in range(0, runs):
-            run_experiment(config = config, working_dir = experiment_name, enemy = enemy, run_num = 0)
+            start_time = time.perf_counter_ns() 
+            run_experiment(config = config, working_dir = experiment_name, enemy = enemy, run_num = run)
+            run_time = time.perf_counter_ns() - start_time
+            run_times[enemy].append(run_time)
+
+    # Save run times to a csv
+    with open(os.path.join(experiment_name, 'run-times.csv'), 'w') as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(['enemy', 'run', 'time'])
+        for enemy in run_times:
+            for run in range(0, len(run_times[enemy])):
+                writer.writerow([enemy, run, run_times[enemy][run]])
+
 
 def run_winner(config, enemy, run_number): 
     env.enemies = [enemy]
