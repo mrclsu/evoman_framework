@@ -11,7 +11,7 @@ from evoman.environment import Environment
 from demo_controller import player_controller
 import numpy as np
 import pandas as pd
-
+import csv
 
 experiment_name = 'controller_specialist'
 
@@ -346,46 +346,48 @@ def training_run(mutagenic_temperature, mutation_intensity, mutation_reset, disc
 def train_set(string="V0", mutagenic_temperature=0.2, mutation_intensity=1, 
               mutation_reset=False, discrete=False, steady=False, comma=False, 
               reseed_cycle=False, elitism=False, half=False, curve_parents=False,
-              set=[1,2,3,4,5,6,7,8]):
+              set=[1,2,3,4,5,6,7,8], runs=1):
     
-    bests = []
-    means = []
-    peaks = []
-    lasts = []
-    up_avg = []
-    st_devs = []
-    times = [time.time_ns()]
+    
+    times = {enemy: [] for enemy in set}
 
     for j in set:
-        global env
-        env = Environment(experiment_name=experiment_name,
-				    playermode="ai",
-                    enemies=[j],
-				    player_controller=player_controller(n_hidden_neurons),
-			  	    speed="fastest",
-				    enemymode="static",
-				    level=2,
-				    visuals=False)
-        best, mean_stat, peak_stat, last_best, upper_avg_stat, st_dev = training_run(mutagenic_temperature, mutation_intensity, mutation_reset, discrete, steady, comma, reseed_cycle, elitism, half, curve_parents)
-        bests.append(best)
-        means.append(mean_stat)
-        peaks.append(peak_stat)
-        lasts.append(last_best)
-        up_avg.append(upper_avg_stat)
-        st_devs.append(st_dev)
-        times.append(time.time_ns())
+        for run in range(0, runs):
+            global env
+            env = Environment(experiment_name=experiment_name,
+                        playermode="ai",
+                        enemies=[j],
+                        player_controller=player_controller(n_hidden_neurons),
+                        speed="fastest",
+                        enemymode="static",
+                        level=2,
+                        visuals=False)
+            start_time = time.perf_counter_ns()
+            best, mean_stat, peak_stat, last_best, upper_avg_stat, st_dev = training_run(mutagenic_temperature, mutation_intensity, mutation_reset, discrete, steady, comma, reseed_cycle, elitism, half, curve_parents)
+            runtime = time.perf_counter_ns() - start_time
+            times[j].append(runtime)
 
-    np.savetxt(f"{string}_Params.csv", bests, delimiter=",")
-    np.savetxt(f"{string}_Last_Params.csv", lasts, delimiter=",")
-    np.savetxt(f"{string}_Timestamps.csv", times, delimiter=",")
+            np.savetxt(f"{string}_{j}_{run}_Means.csv", mean_stat, delimiter=",")
+            np.savetxt(f"{string}_{j}_{run}_Peaks.csv", peak_stat, delimiter=",")
+            np.savetxt(f"{string}_{j}_{run}_Upper_Avg.csv", upper_avg_stat, delimiter=",")
+            np.savetxt(f"{string}_{j}_{run}_St_Dev.csv", st_dev, delimiter=",")
+            np.savetxt(f"{string}_{j}_{run}_Params.csv", best, delimiter=",")
+            np.savetxt(f"{string}_{j}_{run}_Last_Params.csv", last_best, delimiter=",")
 
-    if early_stop != True:
-        np.savetxt(f"{string}_Means.csv", means, delimiter=",")
-        np.savetxt(f"{string}_Peaks.csv", peaks, delimiter=",")
-        np.savetxt(f"{string}_Upper_Avg.csv", up_avg, delimiter=",")
-        np.savetxt(f"{string}_St_Dev.csv", st_devs, delimiter=",")
+    with open(f"{string}_Runtimes.csv", 'w') as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(['enemy', 'run', 'time'])
+        for enemy in times:
+            for run in range(0, len(times[enemy])):
+                writer.writerow([enemy, run, times[enemy][run]])
 
-    print(f'Timestamps: {times}')
+    # if early_stop != True:
+        # np.savetxt(f"{string}_Means.csv", means, delimiter=",")
+        # np.savetxt(f"{string}_Peaks.csv", peaks, delimiter=",")
+        # np.savetxt(f"{string}_Upper_Avg.csv", up_avg, delimiter=",")
+        # np.savetxt(f"{string}_St_Dev.csv", st_devs, delimiter=",")
+
+    # print(f'Timestamps: {times}')
 
 def test_params(string, runs=1, set=[1,2,3,4,5,6,7,8]):
     bests = pd.read_csv(f"{string}_Params.csv", delimiter=",", header=None)
@@ -418,8 +420,8 @@ def test_params(string, runs=1, set=[1,2,3,4,5,6,7,8]):
 
 filename = "V22.1_Test"
 train_set(filename, elitism=5, half=False, mutagenic_temperature=0.1, curve_parents=True, 
-          discrete=False, reseed_cycle=False, set=[1,4,6])
+          discrete=False, reseed_cycle=False, set=[1,4,6], runs=10)
 
 #Test the best parameters
 
-performance = test_params(filename, 1, set=[1,4,6])
+#performance = test_params(filename, 1, set=[1,4,6])
