@@ -28,7 +28,7 @@ mutagenic_temperature = 0.2
 # Reproduction Parameters
 discrete = False
 individual_cross = False
-curve_parents = False\
+curve_parents = False
 
 # Elitism Parameters
 elitism = False
