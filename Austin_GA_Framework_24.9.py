@@ -52,7 +52,7 @@ experiment_name = 'controller_specialist'
 if not os.path.exists(experiment_name):
     os.makedirs(experiment_name)
 
-stat_directory = "EA_Statistics"
+stat_directory = "GA_Statistics"
 
 if not os.path.exists(f'{stat_directory}_{filename}'):
     os.makedirs(f'{stat_directory}_{filename}')
