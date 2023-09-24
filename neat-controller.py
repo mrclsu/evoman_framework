@@ -58,7 +58,7 @@ def eval_genomes(genomes, config):
 
 
 def run_experiment(config, working_dir, enemy, run_num = 0):
-        # Create the population, which is the top-level object for a NEAT run.
+    # Create the population, which is the top-level object for a NEAT run.
     p = neat.Population(config)
 
     # Add a stdout reporter to show progress in the terminal.
@@ -99,9 +99,9 @@ def run(config, enemies = [1, 4, 6], runs = 1):
     run_times = {enemy: [] for enemy in enemies}
 
     for enemy in enemies:
-        env.enemies = [enemy]
         for run in range(0, runs):
             init_env()
+            env.enemies = [enemy]
             start_time = time.perf_counter_ns() 
             run_experiment(config = config, working_dir = experiment_name, enemy = enemy, run_num = run)
             run_time = time.perf_counter_ns() - start_time
@@ -116,10 +116,10 @@ def run(config, enemies = [1, 4, 6], runs = 1):
                 writer.writerow([enemy, run, run_times[enemy][run]])
 
 
-def run_winner(config, enemy, run_number): 
+def run_winner(config, enemy, run_number, speed = 'normal'): 
     env.enemies = [enemy]
-    env.visuals = True
-    env.speed = 'normal'
+    env.speed = speed 
+    env.visuals = visuals
 
     with open(os.path.join(experiment_name, 'winners', f'winner-{enemy}-{run_number}.pkl'), 'rb') as input_file:
         genome = pickle.load(input_file)
@@ -127,7 +127,29 @@ def run_winner(config, enemy, run_number):
         player = player_controller(net)
 
         env.player_controller = player
-        print(env.play()[0])
+        fitness, player_life, enemy_life, time = env.play()
+        print(fitness, player_life)
+        return fitness, player_life, enemy_life, time
+
+def run_all_winners(config, enemies = [1, 4, 6], runs = 1):
+    for enemy in enemies:
+        fitnesses = []
+        player_lives = []
+        enemy_lives = []
+        for run in range(0, runs):
+            init_env()
+            fitness, player_life, enemy_life, _ = run_winner(config = config, enemy = enemy, run_number = run, speed = 'fastest')
+            fitnesses.append(fitness)
+            player_lives.append(player_life)
+            enemy_lives.append(enemy_life)
+
+        # Save the fitness and player life to a csv
+        with open(os.path.join(experiment_name, f'winners-{enemy}.csv'), 'w') as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerow(['run', 'fitness', 'player_life', 'enemy_life', 'individual_gain'])
+            for run in range(0, len(fitnesses)):
+                writer.writerow([run, fitnesses[run], player_lives[run], (player_lives[run] - enemy_lives[run])])
+
 
 
 def main():
@@ -148,6 +170,7 @@ def main():
     # Add command line flags
     parser.add_argument("--experiment", action="store_true", help="Run all experiments.")
     parser.add_argument("--visuals", action="store_true", help="Show visuals for the experiment.")
+    parser.add_argument("--winners", action="store_true", help="Runs the winners of a previous experiment.")
     parser.add_argument("--winner", nargs=2, metavar=("ENEMY_NUMBER", "RUN_NUMBER"), help="Runs the winner of a previous experiment.")
 
     args = parser.parse_args()
@@ -159,12 +182,14 @@ def main():
 
     # Execute based on flags
     if args.experiment:
-        run(config, enemies=[1, 4, 6], runs=10)
+        run(config, enemies=[4, 6], runs=10)
 
     if args.winner:
         enemy, run_number = map(int, args.winner)  # Convert string arguments to integers
         run_winner(config, enemy, run_number)
 
+    if args.winners:
+        run_all_winners(config, enemies=[1, 4, 6], runs=10)
 
 
 if __name__ == '__main__':
