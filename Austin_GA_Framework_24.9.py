@@ -1,5 +1,5 @@
 ########################################
-# An Evolutionary Algorithm Framework  #
+# A Genetic Algorithm Framework        #
 # By Austin Dickerson                  #
 # 10/9/2023                            #
 ########################################
