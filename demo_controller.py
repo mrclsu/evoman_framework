@@ -17,7 +17,7 @@ class player_controller(Controller):
 	def __init__(self, _n_hidden):
 		self.n_hidden = [_n_hidden]
 
-	def set(self,controller, n_inputs):
+	def set(self, controller, n_inputs):
 		# Number of hidden neurons
 
 		if self.n_hidden[0] > 0:

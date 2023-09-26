@@ -22,7 +22,7 @@ player mode: ai
 
 enemy mode: static
 
-level: 1
+level: 2
 
 clock precision: low
 
