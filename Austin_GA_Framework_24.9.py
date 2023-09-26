@@ -45,7 +45,7 @@ random.seed(579)
 np.random.seed(135)
 
 
-filename = "TEST24"
+filename = "V22.1_Test"
 
 experiment_name = 'controller_specialist'
 
@@ -652,10 +652,10 @@ if __name__ == '__main__':
 
     # Train New GAs
     #train_set(filename, elitism=5, half=False, mutagenic_temperature=0.1, curve_parents=True, discrete=False, reseed_cycle=False, set=[1,4,6], speciate=True, threshold=0.4, speciation_frequency=10, runs=10)
-    train_set(filename, elitism=5, half=False, mutagenic_temperature=0.1, curve_parents=True, discrete=False, reseed_cycle=False, set=[1,4,6], runs=10)
+    #train_set(filename, elitism=5, half=False, mutagenic_temperature=0.1, curve_parents=True, discrete=False, reseed_cycle=False, set=[1,4,6], runs=10)
 
     # Test the best parameters
-    performance = test_params(filename, 5, set=[1,4,6], experiment_count=10)
+    performance = test_params(filename, 1, set=[1,4,6], experiment_count=10)
 
 
 
