@@ -37,13 +37,13 @@ settings = {
 'midpoint': False,
 
 # Experiment Parameters
-'pop_size': 500,
+'pop_size': 100,
 'generations': 20,
 'early_stop': False,
 
 # Mutation Parameters
-'mutation_intensity': 0.1,
-'mutagenic_temperature': 1,
+'mutation_intensity': 1,
+'mutagenic_temperature': 0.1,
 'mutation_reset': False,
 
 # Reproduction Parameters 
@@ -586,8 +586,7 @@ def reproduce_by_species(pop, generation, species_count=0, species=None):
     for i in range(species_count):
 
         if len(species[f'species_{i+1}_list']) != 0:
-            scores, maximum, p_life, e_life, gametime = test_population(species[f'species_{i+1}_list'])
-            gain = p_life - e_life
+            scores, maximum, p_life, e_life, gametime, gains = test_population(species[f'species_{i+1}_list'])
             probability_sets.append(relative_prob(scores))
             scores2 = evo_normalize(scores)
             norm_avg.append(np.average(scores2))
@@ -1049,93 +1048,14 @@ env = Environment(experiment_name=experiment_name,
                             visuals=False)
 
 
-#############################################################################################################
-# Starter culture
-
-populations = {}
-
-for i in range(1,9):
-
-    env.enemies = [i]
-    populations[f'pop_{i}'] = evoman_train_set(filename, pop, runs, save=False, set=[i], pop_size=100, generations=20, curve_parents=True, elitism=1)
-
-pop = np.array(populations[f'pop_{1}'])
-
-for j in range(2,9):
-    pop = np.vstack((pop,np.array(populations[f'pop_{j}'])))
-
-print(pop.shape)
-np.savetxt(f"{stat_directory}_{filename}/Starter_Culture.csv", pop, delimiter=",")
-
-##############################################################################################################
-
-
-# Train against bosses [5-8]
-filename = f'GENERALIST_8_POP_V1_[5,6,7,8]'
+filename = f'GENERALIST_TEST'
 print(filename)
 
 if not os.path.exists(f'{stat_directory}_{filename}'):
     os.makedirs(f'{stat_directory}_{filename}')
 
-pop1 = pd.read_csv(f"{stat_directory}_GENERALIST_8_POPV1/Starter_Culture.csv", delimiter=",", header=None)
-new_pop = []
-for i in range(4,8):
-    new_pop.append(pop1.iloc[(i*100)+80:(i*100)+100])
-
-pop1 = np.vstack(new_pop)
-
-# Train new algorithms
-starter_pop1 = evoman_train_set(filename, pop1, runs, save=True, pop_size=500, generalist=True, set=[5,6,7,8], individual_cross=True, differential_evolution=False, multiple_mode=True, generations=30)
-starter_pop1 = np.array(starter_pop1)
-np.savetxt(f"{stat_directory}_GENERALIST_8_POPV1/Starter_Culture_Backup_[5-8].csv", starter_pop1, delimiter=",")
-
-
-# Test the best parameters
-performance, avg_life, avg_gain = evoman_test_params(filename, 1, set=[1,2,3,4,5,6,7,8], experiment_count=1, save=True)
-
-
-
-# Train against bosses [1-4]
-starter_pop1 = pd.read_csv(f"{stat_directory}_GENERALIST_8_POPV1/Starter_Culture_Backup_[5-8].csv", delimiter=",", header=None)
-starter_pop1 = np.array(starter_pop1)
-filename = f'GENERALIST_8_POP_V1_[1,2,3,4]'
-print(filename)
-
-if not os.path.exists(f'{stat_directory}_{filename}'):
-    os.makedirs(f'{stat_directory}_{filename}')
-
-pop2 = pd.read_csv(f"{stat_directory}_GENERALIST_8_POPV1/Starter_Culture.csv", delimiter=",", header=None)
-new_pop = []
-for i in range(0,4):
-    new_pop.append(pop2.iloc[(i*100)+80:(i*100)+100])
-
-pop2 = np.vstack(new_pop)
-
-# Train new algorithms
-starter_pop2 = evoman_train_set(filename, pop2, runs, save=True, set=[1,2,3,4], generalist=True, individual_cross=True, multiple_mode=True, generations=30)
-starter_pop2 = np.array(starter_pop2)
-np.savetxt(f"{stat_directory}_GENERALIST_8_POPV1/Starter_Culture_Backup_[1-4].csv", starter_pop2, delimiter=",")
-
-# Test the best parameters
-performance, avg_life, avg_gain = evoman_test_params(filename, 1, set=[1,2,3,4,5,6,7,8], experiment_count=1, save=True)
-
-
-# Train against all bosses
-full_starter = np.vstack((starter_pop1, starter_pop2))
-np.savetxt(f"{stat_directory}_GENERALIST_8_POPV1/Starter_Culture_NEW.csv", full_starter, delimiter=",")
-
-population = pd.read_csv(f"{stat_directory}_GENERALIST_8_POPV1/Starter_Culture_NEW.csv", delimiter=",", header=None)
-population = np.array(population)
-
-filename = f'GENERALIST_FULL_STARTER_TEST1'
-print(filename)
-
-if not os.path.exists(f'{stat_directory}_{filename}'):
-    os.makedirs(f'{stat_directory}_{filename}')
-
-final_pop = evoman_train_set(filename, population, runs, save=True, set=[1,2,3,4,5,6,7,8], pop_size=1000, generalist=True, differential_evolution=True, multiple_mode=True, generations=50)
-final_pop = np.array(final_pop)
-#np.savetxt(f"{stat_directory}_GENERALIST_8_POPV1/Starter_Culture_FINALPOP.csv", final_pop, delimiter=",")
+# Train new GAs
+evoman_train_set(filename, population, runs, save=True)
 
 # Test the best parameters
 performance, avg_life, avg_gain = evoman_test_params(filename, 1, set=[1,2,3,4,5,6,7,8], experiment_count=1, save=True, visuals=True)
