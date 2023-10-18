@@ -19,7 +19,7 @@ mu_size = 50  # Number of initial individuals
 lambda_size = 50 # Number of children to produce at each generation
 crossover_prob = 0.7
 mutation_prob = 0.2
-gen_count = 250
+gen_count = 350
 dom_u = 1
 dom_l = -1
 
