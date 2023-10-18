@@ -122,7 +122,7 @@ def run_train(run = 1, enemy = 0):
 
 def run_pop():
     # Load pickled population
-    with open(f'{experiment_name}/hof1.pkl', 'rb') as f:
+    with open(f'{experiment_name}/def_0_9_hof100.pkl', 'rb') as f:
         hof = pickle.load(f)
 
         global env
