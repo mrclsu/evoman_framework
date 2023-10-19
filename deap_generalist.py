@@ -121,35 +121,60 @@ def run_train(run = 1, enemy = 0):
         train(file_name_prefix=f'{key}_{enemy}_', run=run)
 
 def run_pop():
+    
+
+    envs = {
+        'def': default_env,
+        'no_time': no_time_env,
+        'bonus_time': time_bonus_env,
+    }
+
+    winners = {
+        'def': [],
+        'no_time': [],
+        'bonus_time': [],
+    }
+
     # Load pickled population
-    with open(f'{experiment_name}/def_0_9_hof100.pkl', 'rb') as f:
-        hof = pickle.load(f)
+    for key, e in envs.items():
+        for run in range(0, 10):
 
-        global env
-        env = default_env(experiment_name, player_controller(n_hidden_neurons))
-        env.enemies = [1, 2, 3, 4, 5, 6, 7, 8]
+            for enemy in [0, 1]:
+                with open(f'{experiment_name}/350_gens/{key}_{enemy}_{run}_hof100.pkl', 'rb') as f:
+                    hof = pickle.load(f)
 
-        res = map(lambda p: (toolbox.evaluate(p), p), hof)
-        fit = map(lambda r: r[0], res)
-        for f in fit:
-            print(f)
+                    global env
+                    env = e(experiment_name, player_controller(n_hidden_neurons))
+                    env.enemies = [1,2,3,4,5,6,7,8]
 
+                    res = map(lambda p: (toolbox.evaluate(p), p), hof)
+                    fit = map(lambda r: r[0], res)
+                    for f in fit:
+                        print(f)
+                    np.savetxt('winner.txt', hof[np.argmax(fit)])
+                    winner = hof[np.argmax(fit)]
+                    winners[key].append(winner)
+
+
+    for key, e in envs.items():
+        with open(f'{experiment_name}/350_gens/{key}_winners.csv', 'w') as csvfile:
+            fieldnames = ['run', 'fitness', 'player_life', 'enemy_life', 'time']
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         
-    np.savetxt('winner.txt', hof[np.argmax(fit)])
-    winner = hof[np.argmax(fit)]
+            writer.writeheader()
+            for winner, i in zip(winners[key], range(0, 20)):
+                print(f'Running winner {i} for {winner}')
+                env = e(experiment_name, player_controller(n_hidden_neurons))
+                env.enemies = [1,2,3,4,5,6,7,8]
 
-        # Run individual with highest fitness
-    env.visuals = True
-    env.speed = 'normal'
-    env.multiplemode = 'no'
-
-    for i in range(1, 9):
-        env.enemies = [i]
-        f, p, e, t = simulation(env, winner)
-        print(f'Enemy: {i}, Fitness: {f}, Gain: {p - e}, Time: {t}')
-    # fitness = simulation(env, hof[np.argmax(fit)]) 
-    # print(hof[np.argmax(fit)])
-    # print(f'Fitness: {fitness}')
+                fitness, player_life, enemy_life, time = simulation(env, winner)
+                writer.writerow({
+                    'run': i,
+                    'fitness': fitness,
+                    'player_life': player_life,
+                    'enemy_life': enemy_life,
+                    'time': time 
+                })
 
 
 def main():
