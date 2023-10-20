@@ -57,17 +57,19 @@ for patch, color in zip(boxplots['boxes'], colors):
 # Add mean numbers on top of the median lines
 medians = [median.get_ydata()[0] for median in boxplots['medians']]
 for i, (median, label) in enumerate(zip(medians, labels)):
-    ax.text(i + 1, median + 0.5, f'{median:.2f}', ha='center', va='center', fontsize=8, color='black')
+    ax.text(i + 1, median + 0.5, f'{median:.2f}', ha='center', va='center', fontsize=10, color='black')
 
 # Add legends
 legend_elements = [
     Patch(facecolor='lightgreen', edgecolor='black', label='[2,3,4,5,6,8]'),
     Patch(facecolor='lightblue', edgecolor='black', label='[1,4,6,8]')
 ]
-ax.legend(handles=legend_elements, loc='lower right')
+ax.legend(handles=legend_elements, loc='lower right', fontsize=14)
 
-ax.set_title('Boxplots of Mean Gain for Different EAs and Enemy Groups')
-ax.set_ylabel('Gain')
+ax.set_title('Boxplots of Mean Gain for Different EAs and Enemy Groups', fontsize=14)
+ax.set_ylabel('Gains', fontsize=14)
+ax.tick_params(axis='both', which='major', labelsize=14)
+
 plt.show()
 
 # Perform t-tests
