@@ -39,9 +39,9 @@ def plot_combined_results(ea_data, enemy_group):
     generations = list(range(0, len(ea_data['EA1']['avg_mean'])))
 
     if enemy_group == 0:
-        enemies = [2,3,4,5,6,8]
+        enemies = '2,3,4,5,6,8'
     elif enemy_group == 1:
-        enemies = [1,4,6,8]
+        enemies = '1,4,6,8'
 
     plt.figure(figsize=(10, 6))
     for ea_type, data in ea_data.items():
@@ -53,11 +53,15 @@ def plot_combined_results(ea_data, enemy_group):
                          np.add(data['avg_max'], data['std_max']), color=color, alpha=0.1)
         plt.plot(generations, data['avg_max'], label=f'Max Fitness {ea_type}', color=color)
 
-    plt.title(f'Enemies {enemies}', fontsize=20)
+    plt.title(f'Enemy {enemies}', fontsize=20)
     plt.xlabel('Generations', fontsize=20)
     plt.ylabel('Fitness', fontsize=20)
+    ax = plt.gca() 
+    ax.tick_params(axis='both', which='major', labelsize=14)
+    plt.xlim(0, 351)
     plt.legend(fontsize=16)
     plt.tight_layout()
+    plt.grid()
     plt.savefig(save_path, format='png', dpi=300) 
     plt.close()
 
