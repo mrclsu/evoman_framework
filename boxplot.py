@@ -4,43 +4,35 @@ import numpy as np
 import seaborn as sns 
 import matplotlib.patches as mpatches
 
-# Define warm and cool color palettes
-warm_palette = sns.color_palette("YlOrRd", 3)
-cool_palette = sns.color_palette("Blues", 3)
+for train_group in [0, 1]:
+    data1 = pd.read_csv(f'deap_specialist/350_gens/def_{train_group}_winners.csv')
+    data2 = pd.read_csv(f'deap_specialist/350_gens/no_time_{train_group}_winners.csv')
+    data3 = pd.read_csv(f'deap_specialist/350_gens/bonus_time_{train_group}_winners.csv')
 
-# Define the enemy numbers and run numbers for NEAT and GA
-enemies = [1, 2, 3, 4, 5, 6, 7, 8]
-runs = 10
+    # Calculate the difference between player_life and enemy_life for each dataset
+    data1['life_diff'] = data1['player_life'] - data1['enemy_life']
+    data2['life_diff'] = data2['player_life'] - data2['enemy_life']
+    data3['life_diff'] = data3['player_life'] - data3['enemy_life']
 
-# Create data dictionaries for the 3 fitness functions
-data1 = {}
-data2 = {}
-data3 = {}
+    # Combine the data into a single DataFrame
+    combined_data = pd.concat([data1['life_diff'], data2['life_diff'], data3['life_diff']], axis=1)
+    combined_data.columns = ['Fitness Function with Time Penalty', 'Fitness Function without Time Penalty', 'Fitness Function with Time Bonus']
 
-# Load the data from the three CSV files
-data1 = pd.read_csv('deap_specialist/box_plot/def_top_10.csv')
-data2 = pd.read_csv('deap_specialist/box_plot/no_time_top_10.csv')
-data3 = pd.read_csv('deap_specialist/box_plot/bonus_time_top_10.csv')
+    # Create a box plot
+    plt.figure(figsize=(10, 6))
+    sns.boxplot(data=combined_data, palette=['#e4c1f9', '#a9def9', '#d0f4de'])
 
-# Calculate the difference between player_life and enemy_life for each dataset
-data1['life_diff'] = data1['player_life'] - data1['enemy_life']
-data2['life_diff'] = data2['player_life'] - data2['enemy_life']
-data3['life_diff'] = data3['player_life'] - data3['enemy_life']
-
-# Combine the data into a single DataFrame
-combined_data = pd.concat([data1['life_diff'], data2['life_diff'], data3['life_diff']], axis=1)
-combined_data.columns = ['Fitness Function with Time Penalty', 'Fitness Function without Time Penalty', 'Fitness Function with Time Bonus']
-
-# Create a box plot
-plt.figure(figsize=(10, 6))
-sns.boxplot(data=combined_data, palette=['#e4c1f9', '#a9def9', '#d0f4de'])
-plt.title('Distribution of Max Fitness Across 10 Runs', fontsize='xx-large')
-plt.ylabel('Energy Gain', fontsize='xx-large')
-legend_handles = [mpatches.Patch(color='#e4c1f9', label='Fitness Function with Time Penalty'),
-                  mpatches.Patch(color='#a9def9', label='Fitness Function without Time Penalty'),
-                  mpatches.Patch(color='#d0f4de', label='Fitness Function with Time Bonus')]
-plt.legend(handles=legend_handles, title='Fitness Functions', title_fontsize='xx-large', fontsize='large')
-plt.show()
+    if train_group == 0:
+        plt.title('Distribution of Energy Levels Across 10 Runs | Set of enemies: 2, 3, 4, 5, 6, 8', fontsize='xx-large')
+    if train_group == 1:
+        plt.title('Distribution of Energy Levels Across 10 Runs | Set of enemies: 1, 4, 6, 8', fontsize='xx-large')
+    plt.ylabel('Energy Gain', fontsize='xx-large')
+    plt.xlabel('Fitness Function', fontsize='xx-large')
+    legend_handles = [mpatches.Patch(color='#e4c1f9', label='Fitness Function with Time Penalty'),
+                    mpatches.Patch(color='#a9def9', label='Fitness Function without Time Penalty'),
+                    mpatches.Patch(color='#d0f4de', label='Fitness Function with Time Bonus')]
+    plt.legend(handles=legend_handles, title='Fitness Functions', title_fontsize='xx-large', fontsize='large')
+    plt.show()
 
 
 
